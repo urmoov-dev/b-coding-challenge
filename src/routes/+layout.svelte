@@ -1,36 +1,32 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import '../app.css';
-	import type { LightningNodes } from '$lib/types';
-	import { getLightning, setLightningContext } from '$lib/lightning.svelte';
+	import { setLightningContext } from '$lib/lightning.svelte';
 	import Header from './components/Header.svelte';
 	import Footer from './components/Footer.svelte';
+	import { page } from '$app/state';
 
-	type $$Props = {
-		data: {
-			nodes: LightningNodes
-		},
-		children: Snippet
-	}
-	let { data, children } : $$Props = $props();
+	let {  children }  = $props();
+
+	let url = page.url
+
+	$inspect(page)
 
 	setLightningContext()
-	const lightning = getLightning()
-
-	$effect(() => {
-		lightning.nodes = data.nodes
-	})
 
 </script>
 
 <Header></Header>
 <main class="relative flex-1">
-	{@render children()}
+	{#key url}
+		<div class="absolute">
+			{@render children()}
+		</div>
+	{/key}
 </main>
 <Footer></Footer>
 
 <style>
 	:global(body) {
+		margin: 0;
 		height: 100vh;
 		height: 100dvh;
 		display: flex;
