@@ -1,7 +1,16 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import '../app.css';
 
-	let { children } = $props();
+	type $$Props = {
+		data: {},
+		children: Snippet
+	}
+
+	let { data, children } = $props();
+
+	$inspect(data)
+
 </script>
 
 {@render children()}
