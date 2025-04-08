@@ -1,11 +1,14 @@
 <script lang="ts">
+	import "../app.css"
 	import { setLightningContext } from '$lib/lightning.svelte';
 	import Header from './components/Header.svelte';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import { page } from '$app/state';
 	import ThumbNav from './components/ThumbNav.svelte';
+	import { fade } from 'svelte/transition';
+	import { quartIn } from 'svelte/easing';
 
-	let {  children }  = $props();
+	let {  children, data }  = $props();
 
 	let url = page.url
 
@@ -21,8 +24,13 @@
 
 <Header></Header>
 <main class="relative flex-1">
-	{#key url}
+	{#key data.url}
+		<div class="pageWrapper absolute inset-0 w-full-h-full"
+			in:fade={{duration: 500, easing: quartIn}} 
+			out:fade={{duration:500}}
+		>
 			{@render children()}
+		</div>	
 	{/key}
 </main>
 <ThumbNav></ThumbNav>
@@ -33,6 +41,7 @@
 
 	* {
 		box-sizing: border-box;
+		font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 	}
 
 	body {
@@ -44,4 +53,5 @@
 		background-color: #131313;
 	}
 }
+
 </style>
