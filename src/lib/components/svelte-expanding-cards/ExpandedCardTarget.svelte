@@ -2,13 +2,17 @@
 	import { onMount } from "svelte";
 	import { getTargetContext, setTargetContext, type TargetContainer } from "./ExpandingCards.svelte";
 
-    let { children, classes = "", style = "", contextKey = undefined} = $props()
+    let { children = undefined, classes = "", style = "", contextKey = undefined} = $props()
 
     let thisTarget:HTMLElement | undefined = $state()
     $effect(() => {container.node = thisTarget})
 
-    let container : TargetContainer = $state({})
-    contextKey ? setTargetContext(container, contextKey) : setTargetContext(container)     
+    let container = $state<TargetContainer>(contextKey ? getTargetContext(contextKey) : getTargetContext() || {})
+
+    function bindTarget() {
+        if (Object.keys(container).length === 0 || JSON.stringify(container) === "{}") return
+        contextKey ? setTargetContext(container, contextKey) : setTargetContext(container)     
+    }
     
     function getPositionDetails() {
         if (!thisTarget) return
@@ -33,7 +37,9 @@
     bind:clientWidth={container.width}
     bind:this={thisTarget} 
 > 
-    {@render children?.()}
+    {#if children}
+        {@render children()}
+    {/if}
 </section>
 
 <style>

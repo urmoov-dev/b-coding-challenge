@@ -3,7 +3,6 @@
 	import { type TransitionConfig } from "svelte/transition";
 	import { getTargetContext, type TargetContainer } from "./ExpandingCards.svelte";
 	import { circOut } from "svelte/easing";
-	import { getLayoutState } from "$lib/components/layout/layout-state.svelte";
 	import { pushState } from "$app/navigation";
 	import { page } from "$app/state";
 	import { setToValue } from "$lib/functions/forObjects";
@@ -25,7 +24,8 @@
             key?: string,
             value?: boolean | string | number | null | any[]
         }[],
-        fixToBottom?: boolean
+        fixToBottom?: boolean,
+        customMethod?: void | (() => void)
     }
 
     let { 
@@ -44,7 +44,8 @@
         toggleProp= $bindable(undefined),
         contextKey = undefined,
         shallowRouting = [],
-        fixToBottom = false
+        fixToBottom = false,
+        customMethod = () => {}
     } : $$Props = $props()       
 
     let expandingCard = $state({showDetails: toggleProp || false})
@@ -62,11 +63,14 @@
 
     const {height: containerHeight = 0, width: containerWidth = 0, top: containerTop = 0, left: containerLeft = 0} = $derived(containerContext)
 
+
     async function toggleDetails(e:MouseEvent, toggleTo = !showDetails) {
         e.stopPropagation()
 
         inTransition = true
         thisCardDetails?.querySelector(":scope > .summary")?.classList.add("border");
+
+        customMethod()
 
         //set behavior if using shallowRouting
         if (shallowRouting.length > 0) {
@@ -102,7 +106,7 @@
     //transition of the details snippet
     function revealDetails(node:HTMLElement, transitionConfig: TransitionConfig) {
         containerContext.refresh?.()
-        getPositionDetails()
+        getSummaryPositionDetails()
 
         node.classList.add("inTransition")
         node.classList.add("outline")
@@ -111,8 +115,8 @@
         const transformDiff = {
             width: 100-(100*cardWidth)/containerWidth,
             height: 100-(100*cardHeight)/containerHeight,
-            top: card.top! - containerTop,
-            left : card.left! - containerLeft 
+            top: summaryButton.top! - containerTop,
+            left : summaryButton.left! - containerLeft 
         }
 
         const allOverlays = thisCardDetails!.querySelectorAll(".opacity-overlay")     
@@ -137,7 +141,7 @@
 
     function hideSummary(node:HTMLElement, transitionConfig: TransitionConfig) {
         containerContext.refresh?.()
-        getPositionDetails()
+        getSummaryPositionDetails()
         
         node?.querySelector(".opacity-overlay")?.classList.add("frosted-glass")
         node.style.zIndex = "50"
@@ -159,28 +163,28 @@
     }
 
 
-    let thisCardElement:HTMLElement | undefined = $state()
+    let thisSummaryElement:HTMLElement | undefined = $state()
     let thisCardProxy:HTMLElement | undefined = $state()
     let thisCardDetails:HTMLElement | undefined = $state()
     
-    $effect(() => {card.node = thisCardElement})
+    $effect(() => {summaryButton.node = thisSummaryElement})
 
-    let card : TargetContainer = $state({})
+    let summaryButton : TargetContainer = $state({})
     $effect(() => {
-        if (card.top && (card.height || card.width)) {
-            getPositionDetails();
+        if (summaryButton.top && (summaryButton.height || summaryButton.width)) {
+            getSummaryPositionDetails();
         }
     }) 
 
-    const {top: cardTop = 0, left: cardLeft = 0, height: cardHeight = 0, width: cardWidth = 0} = $derived(card)
+    const {top: cardTop = 0, left: cardLeft = 0, height: cardHeight = 0, width: cardWidth = 0} = $derived(summaryButton)
     
-    function getPositionDetails() {
-        if (!thisCardElement) return
-        const cardDomRect:DOMRect | undefined = thisCardElement.getBoundingClientRect() ?? undefined
-        card.top = cardDomRect?.top
-        card.left = cardDomRect?.left
-        card.width = cardDomRect?.width
-        card.height = cardDomRect?.height
+    function getSummaryPositionDetails() {
+        if (!thisSummaryElement) return
+        const cardDomRect:DOMRect | undefined = thisSummaryElement.getBoundingClientRect() ?? undefined
+        summaryButton.top = cardDomRect?.top
+        summaryButton.left = cardDomRect?.left
+        summaryButton.width = cardDomRect?.width
+        summaryButton.height = cardDomRect?.height
     }
     
     let inTransition = $state(false);
@@ -203,21 +207,16 @@
 
     onMount(async () => {
         containerContext.refresh?.()
-        getPositionDetails()
+        getSummaryPositionDetails()
     })
     
-    const layout = getLayoutState()
-
-    $effect(() => {
-        if (layout.height || layout.width) getPositionDetails()
-    })
 </script>
 
 
 
-<button class="button expanding-card {contextKey} {classes}"
+<button class="button expanding-summaryButton {contextKey} {classes}"
     style="height: {height ?? "auto"}; --blurTime: {transitionConfig.delay!/500 || 0.25}s;"
-    bind:this={thisCardElement}
+    bind:this={thisSummaryElement}
     onclick={toggleDetails}
 >
     <div bind:this={thisCardProxy} class="proxy" style={buttonStyle}>{@render summary?.()}</div>
@@ -254,11 +253,11 @@
             thisCardDetails!.classList.remove("inTransition")
             inTransition = false
             containerContext.refresh?.()
-            getPositionDetails()
+            getSummaryPositionDetails()
         }}
         onoutroend={(e) => {
             containerContext.inTransition
-            thisCardElement?.querySelector(".outline")?.classList.remove("outline")
+            thisSummaryElement?.querySelector(".outline")?.classList.remove("outline")
         }}
     >
 
@@ -350,7 +349,7 @@
         transition: opacity 1s ease-out;
     }
 
-    .details > :global(*), .transitionedDetailsWrapper > :global(*) {
+    .details > :global(*:not(button)), .transitionedDetailsWrapper > :global(*) {
         height: 100%;
         width: 100%;
     }
@@ -389,14 +388,14 @@
     }
 
     .outline {
-        outline: 2px solid var(--color-theme-2)
+        outline: 2px solid var(--color-theme-1)
     }
     .border {
-        border: 2px solid var(--color-theme-2)
+        border: 2px solid var(--color-theme-1)
     }
 
     :global(.inTransition .details) {
-        outline: 2px solid var(--color-theme-2);
+        outline: 2px solid var(--color-theme-1);
     }
 
     :global(.inTransition .summary) {
