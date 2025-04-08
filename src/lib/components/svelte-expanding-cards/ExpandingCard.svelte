@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, setContext, tick, type Snippet } from "svelte";
-	import { type TransitionConfig } from "svelte/transition";
+	import { type EasingFunction, type TransitionConfig } from "svelte/transition";
 	import { getTargetContext, type TargetContainer } from "./ExpandingCards.svelte";
 	import { circOut } from "svelte/easing";
 	import { pushState } from "$app/navigation";
@@ -25,7 +25,15 @@
             value?: boolean | string | number | null | any[]
         }[],
         fixToBottom?: boolean,
-        customMethod?: void | (() => void)
+        customMethod?: void | (() => void),
+        detailsIn?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
+        detailsInConfig?: TransitionConfig,        
+        detailsOut?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
+        detailsOutConfig?: TransitionConfig,
+        summaryIn?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
+        summaryInConfig?: TransitionConfig,        
+        summaryOut?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
+        summaryOutConfig?: TransitionConfig,
     }
 
     let { 
@@ -45,7 +53,15 @@
         contextKey = undefined,
         shallowRouting = [],
         fixToBottom = false,
-        customMethod = () => {}
+        customMethod = () => {},
+        detailsIn = undefined,
+        detailsInConfig = undefined,
+        detailsOut = undefined,
+        detailsOutConfig = undefined,
+        summaryIn = undefined,
+        summaryInConfig = undefined,
+        summaryOut = undefined,
+        summaryOutConfig = undefined,
     } : $$Props = $props()       
 
     let expandingCard = $state({showDetails: toggleProp || false})
@@ -104,7 +120,7 @@
     $effect(() => {if (toggleProp !== undefined && showDetails !== toggleProp) toggleWithProp(toggleProp)})
 
     //transition of the details snippet
-    function revealDetails(node:HTMLElement, transitionConfig: TransitionConfig) {
+    function transitionDetails(node:HTMLElement, transitionConfig: TransitionConfig) {
         containerContext.refresh?.()
         getSummaryPositionDetails()
 
@@ -139,7 +155,7 @@
         thisCardProxy!.style.zIndex = ""
     }
 
-    function hideSummary(node:HTMLElement, transitionConfig: TransitionConfig) {
+    function transitionSummary(node:HTMLElement, transitionConfig: TransitionConfig) {
         containerContext.refresh?.()
         getSummaryPositionDetails()
         
@@ -200,15 +216,67 @@
         }
     })
 
-    $effect(() => {
-        
-    })
-
-
     onMount(async () => {
         containerContext.refresh?.()
         getSummaryPositionDetails()
     })
+
+    function processDetailsOut(node:HTMLElement, config: TransitionConfig) {
+        if (!detailsOutConfig) return transitionDetails(node, config)
+        if (detailsOut) {
+            containerContext.refresh?.()
+            getSummaryPositionDetails()
+
+            node.classList.add("inTransition")
+            node.classList.add("outline")
+
+            thisCardDetails?.querySelector(":scope > .opacity-overlay")?.classList.add("frosted-glass");
+            return detailsOut(node, detailsOutConfig)
+        }
+        return transitionDetails(node, config)
+    }
+
+    function processDetailsIn(node:HTMLElement, config: TransitionConfig) {
+        if (!detailsInConfig) return transitionDetails(node, config)
+        if (detailsIn) {
+            containerContext.refresh?.()
+            getSummaryPositionDetails()
+
+            node.classList.add("inTransition")
+            node.classList.add("outline")
+
+            thisCardDetails?.querySelector(":scope > .opacity-overlay")?.classList.add("frosted-glass");
+            
+            return detailsIn(node, detailsInConfig)
+        }
+        return transitionDetails(node, config)
+    }
+    
+    function processSummaryIn(node:HTMLElement, config: TransitionConfig) {
+        if (!summaryInConfig) return transitionSummary(node, config)
+        if (summaryIn) {
+            node?.querySelector(".opacity-overlay")?.classList.add("frosted-glass")
+            node.style.zIndex = "50"
+            if (node?.classList.contains("disabled")) node?.classList.remove("disabled")
+            if (!thisCardProxy?.classList.contains("transparent")) thisCardProxy?.classList.add("transparent")
+            
+            return summaryIn(node, summaryInConfig)
+        }
+        return transitionSummary(node, config)
+    }
+    
+    function processSummaryOut(node:HTMLElement, config: TransitionConfig) {
+        if (!summaryOutConfig) return transitionSummary(node, config)
+        if (summaryOut) {
+            node?.querySelector(".opacity-overlay")?.classList.add("frosted-glass")
+            node.style.zIndex = "50"
+            if (node?.classList.contains("disabled")) node?.classList.remove("disabled")
+            if (!thisCardProxy?.classList.contains("transparent")) thisCardProxy?.classList.add("transparent")
+            
+            return summaryOut(node, summaryOutConfig)
+        }
+        return transitionSummary(node, config)
+    }
     
 </script>
 
@@ -222,7 +290,8 @@
     <div bind:this={thisCardProxy} class="proxy" style={buttonStyle}>{@render summary?.()}</div>
     {#if !showDetails}
         <div class="summary disabled absolute" style={buttonStyle}
-            transition:hideSummary={transitionConfig}
+            in:processSummaryIn={transitionConfig}
+            out:processSummaryOut={transitionConfig}
             onintroend={revealSummary}
         >
             {@render summary?.()}
@@ -241,7 +310,8 @@
                 width: {containerWidth}px;
                 height: {containerHeight}px;
                 {detailsStyle}"
-        transition:revealDetails={transitionConfig}
+        in:processDetailsIn={transitionConfig}
+        out:processDetailsOut={transitionConfig}
         onintroend={(e) => {
             containerContext.inTransition
             const node = e.target as HTMLElement

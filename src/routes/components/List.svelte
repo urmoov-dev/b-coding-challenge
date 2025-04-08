@@ -9,6 +9,8 @@
 	import { faXmark } from "@fortawesome/free-solid-svg-icons";
 	import Fa from "svelte-fa";
 	import ListDetails from "./ListDetails.svelte";
+	import { fade, fly, slide } from "svelte/transition";
+	import { quartOut } from "svelte/easing";
 
     let {headers, lightningNodes, sortBy = $bindable(), formatValue} = $props()
     let selectedHeader = $derived(headers.find((obj: typeof headers[0]) => {return obj.key === sortBy}))
@@ -89,6 +91,8 @@
                         shallowRouting={[
                             {key: `nodes.${node.publicKey}.open`, value: true}
                         ]}
+                        detailsOut={fly} detailsOutConfig={{duration: 1000, easing: quartOut, x: "100%"}} 
+                        summaryIn={fade} summaryInConfig={{duration: 300, easing: quartOut}} 
                     >
                         {#snippet summary()}
                             <button class="w-full h-full flex justify-between">
@@ -97,7 +101,7 @@
                             </button>
                         {/snippet}
                         {#snippet details()}
-                            <ListDetails {node} ></ListDetails>>
+                            <ListDetails {node}></ListDetails>>
                         {/snippet}
                         {#snippet closeDetailsButton()}
                             <button onclick={() => {setPageState(false, `nodes.${node.publicKey}.open`, "replace")}}
