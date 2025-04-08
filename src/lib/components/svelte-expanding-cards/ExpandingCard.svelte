@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { onMount, setContext, tick, type Snippet } from "svelte";
-	import { type EasingFunction, type TransitionConfig } from "svelte/transition";
+	import { type BlurParams, type CrossfadeParams, type DrawParams, type EasingFunction, type FlyParams, type ScaleParams, type SlideParams, type TransitionConfig } from "svelte/transition";
 	import { getTargetContext, type TargetContainer } from "./ExpandingCards.svelte";
 	import { circOut } from "svelte/easing";
 	import { pushState } from "$app/navigation";
 	import { page } from "$app/state";
 	import { setToValue } from "$lib/functions/forObjects";
+
+    type AllTransitionParams = TransitionConfig | BlurParams | FlyParams | SlideParams | ScaleParams | DrawParams | CrossfadeParams
+
     type $$Props = {
         jsStyle?:  {
             height?: string,
@@ -17,7 +20,7 @@
         details?: Snippet,
         closeDetailsButton?: Snippet,
         classes?: string,
-        transitionConfig?: TransitionConfig
+        transitionConfig?: AllTransitionParams
         toggleProp?: boolean,
         contextKey?: string,
         shallowRouting?: {
@@ -27,13 +30,13 @@
         fixToBottom?: boolean,
         customMethod?: void | (() => void),
         detailsIn?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
-        detailsInConfig?: TransitionConfig,        
+        detailsInConfig?: AllTransitionParams,        
         detailsOut?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
-        detailsOutConfig?: TransitionConfig,
+        detailsOutConfig?: AllTransitionParams,
         summaryIn?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
-        summaryInConfig?: TransitionConfig,        
+        summaryInConfig?: AllTransitionParams,        
         summaryOut?: (arg0: HTMLElement, arg1: TransitionConfig) => {},
-        summaryOutConfig?: TransitionConfig,
+        summaryOutConfig?: AllTransitionParams,
     }
 
     let { 
@@ -120,7 +123,7 @@
     $effect(() => {if (toggleProp !== undefined && showDetails !== toggleProp) toggleWithProp(toggleProp)})
 
     //transition of the details snippet
-    function transitionDetails(node:HTMLElement, transitionConfig: TransitionConfig) {
+    function transitionDetails(node:HTMLElement, transitionConfig: AllTransitionParams) {
         containerContext.refresh?.()
         getSummaryPositionDetails()
 
@@ -155,7 +158,7 @@
         thisCardProxy!.style.zIndex = ""
     }
 
-    function transitionSummary(node:HTMLElement, transitionConfig: TransitionConfig) {
+    function transitionSummary(node:HTMLElement, transitionConfig: AllTransitionParams) {
         containerContext.refresh?.()
         getSummaryPositionDetails()
         
@@ -221,7 +224,7 @@
         getSummaryPositionDetails()
     })
 
-    function processDetailsOut(node:HTMLElement, config: TransitionConfig) {
+    function processDetailsOut(node:HTMLElement, config: AllTransitionParams) {
         if (!detailsOutConfig) return transitionDetails(node, config)
         if (detailsOut) {
             containerContext.refresh?.()
@@ -231,12 +234,12 @@
             node.classList.add("outline")
 
             thisCardDetails?.querySelector(":scope > .opacity-overlay")?.classList.add("frosted-glass");
-            return detailsOut(node, detailsOutConfig)
+            return detailsOut(node, detailsOutConfig as TransitionConfig)
         }
         return transitionDetails(node, config)
     }
 
-    function processDetailsIn(node:HTMLElement, config: TransitionConfig) {
+    function processDetailsIn(node:HTMLElement, config: AllTransitionParams) {
         if (!detailsInConfig) return transitionDetails(node, config)
         if (detailsIn) {
             containerContext.refresh?.()
@@ -247,12 +250,12 @@
 
             thisCardDetails?.querySelector(":scope > .opacity-overlay")?.classList.add("frosted-glass");
             
-            return detailsIn(node, detailsInConfig)
+            return detailsIn(node, detailsInConfig as TransitionConfig)
         }
         return transitionDetails(node, config)
     }
     
-    function processSummaryIn(node:HTMLElement, config: TransitionConfig) {
+    function processSummaryIn(node:HTMLElement, config: AllTransitionParams) {
         if (!summaryInConfig) return transitionSummary(node, config)
         if (summaryIn) {
             node?.querySelector(".opacity-overlay")?.classList.add("frosted-glass")
@@ -260,12 +263,12 @@
             if (node?.classList.contains("disabled")) node?.classList.remove("disabled")
             if (!thisCardProxy?.classList.contains("transparent")) thisCardProxy?.classList.add("transparent")
             
-            return summaryIn(node, summaryInConfig)
+            return summaryIn(node, summaryInConfig as TransitionConfig)
         }
         return transitionSummary(node, config)
     }
     
-    function processSummaryOut(node:HTMLElement, config: TransitionConfig) {
+    function processSummaryOut(node:HTMLElement, config: AllTransitionParams) {
         if (!summaryOutConfig) return transitionSummary(node, config)
         if (summaryOut) {
             node?.querySelector(".opacity-overlay")?.classList.add("frosted-glass")
@@ -273,7 +276,7 @@
             if (node?.classList.contains("disabled")) node?.classList.remove("disabled")
             if (!thisCardProxy?.classList.contains("transparent")) thisCardProxy?.classList.add("transparent")
             
-            return summaryOut(node, summaryOutConfig)
+            return summaryOut(node, summaryOutConfig as TransitionConfig)
         }
         return transitionSummary(node, config)
     }
