@@ -1,31 +1,41 @@
 <script lang="ts">
 	import { setLightningContext } from '$lib/lightning.svelte';
 	import Header from './components/Header.svelte';
-	import Footer from './components/Footer.svelte';
+	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import { page } from '$app/state';
+	import ThumbNav from './components/ThumbNav.svelte';
 
 	let {  children }  = $props();
 
 	let url = page.url
 
-	$inspect(page)
-
 	setLightningContext()
 
 </script>
 
+<div style="display:none">
+	{#each locales as locale}
+		<a href={localizeHref(page.url.pathname, { locale })}>{locale}</a>
+	{/each}
+</div>
+
 <Header></Header>
 <main class="relative flex-1">
 	{#key url}
-		<div class="absolute">
 			{@render children()}
-		</div>
 	{/key}
 </main>
-<Footer></Footer>
+<ThumbNav></ThumbNav>
 
 <style>
-	:global(body) {
+	
+:global {
+
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
 		margin: 0;
 		height: 100vh;
 		height: 100dvh;
@@ -33,4 +43,5 @@
 		flex-direction: column;
 		background-color: #131313;
 	}
+}
 </style>

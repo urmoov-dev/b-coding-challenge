@@ -1,11 +1,12 @@
 <script lang="ts">
+	import ThemeManager from "$lib/components/ThemeManager.svelte";
+	import { getLocale } from "$lib/paraglide/runtime.js";
     import type { LightningNodes, SortableLightningProperties } from "$lib/types";
 	import { onMount } from "svelte";
 	import { quartIn } from "svelte/easing";
 	import { fade } from "svelte/transition";
     
-    const { data } = $props()
-    const locale = $derived(data.locale)
+    const locale = getLocale()
 
     let fetchedNodes = $state<LightningNodes>()
     let lightningNodes = $state<LightningNodes>()
@@ -91,55 +92,67 @@
     })
 
 </script>
+<div class="pageWrapper">
 
-{#if !fetchedNodes}
- Loading....
-{:else}
-<div class="table-container flex flex-col" in:fade={{duration: 500, easing: quartIn}} out:fade={{duration:500}}>
-    <table>
-        <thead>
-            <tr>
-            {#each headers as header}
-                <th>
-                    {header.label}
-                {#if header.sortable}
-                    <button onclick={() => {sortBy = header.key as SortableLightningProperties}}>+</button>
-                {/if}
-                </th>                
+    {#if !fetchedNodes}
+     Loading....
+    {:else}
+    <div class="table-container flex flex-col" in:fade={{duration: 500, easing: quartIn}} out:fade={{duration:500}}>
+        <table>
+            <thead>
+                <tr>
+                {#each headers as header}
+                    <th>
+                        {header.label}
+                    {#if header.sortable}
+                        <button onclick={() => {sortBy = header.key as SortableLightningProperties}}>+</button>
+                    {/if}
+                    </th>
+                {/each}
+                </tr>
+            </thead>
+    
+            <tbody>
+            {#each  lightningNodes as LightningNodes as node}
+                <tr>
+                {#each headers as header}
+                {@const tdValue = formatValue(header.key, node)}
+                    <td>{tdValue}</td>
+                {/each}
+                </tr>
             {/each}
-            </tr>
-        </thead>
-
-        <tbody>
-        {#each  lightningNodes as LightningNodes as node}
-            <tr>
-            {#each headers as header}
-            {@const tdValue = formatValue(header.key, node)}
-                <td>{tdValue}</td>
-            {/each}
-            </tr>            
-        {/each}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
+    {/if}
 </div>
-{/if}
 
 <style>
+    .pageWrapper {
+        height: 100%;
+        width: 100%;
+    }
     .table-container {
         align-self: stretch;
         margin-inline: auto;
-        color: white;
-        max-width: 90%;
+        color: var(--color-text-0);
+        max-width: 70%;
         height: 90vh;
         max-width: white;
         overflow: auto;
+        border-radius: 1rem;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        background: #323232;
+        background: var(--color-bg-0);
         padding: 1rem;
+    }
+
+    thead{
+        position: sticky;
+        top: 0;
     }
 
     th, td {
@@ -149,11 +162,17 @@
 
     th {
         text-align: left;
-        background: hsl(0 0% 0% / 0.5);
+        background: var(--color-bg-2);
+    }
+
+    tr:nth-of-type(2n) {
+        background: var(--color-bg-1)
     }
 
     button {
-        cursor: pointer
+        all: unset;
+        cursor: pointer;
+        background-color: var(--color-grey);
     }
 
 </style>
