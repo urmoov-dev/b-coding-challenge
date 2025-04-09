@@ -7,6 +7,7 @@
 	import ThumbNav from './components/ThumbNav.svelte';
 	import { fade } from 'svelte/transition';
 	import { quartIn } from 'svelte/easing';
+	import AppLayout from "$lib/components/AppLayout.svelte";
 
 	let {  children, data }  = $props();
 
@@ -22,18 +23,20 @@
 	{/each}
 </div>
 
-<Header></Header>
-<main class="relative flex-1">
-	{#key data.url}
-		<div class="pageWrapper absolute inset-0 w-full-h-full"
-			in:fade={{duration: 500, easing: quartIn}} 
-			out:fade={{duration:500}}
-		>
-			{@render children()}
-		</div>	
-	{/key}
-</main>
-<ThumbNav></ThumbNav>
+<AppLayout>
+	<Header></Header>
+	<main class="relative flex-1">
+		{#key data.url}
+			<div class="pageWrapper absolute inset-0 w-full-h-full"
+				in:fade={{duration: 500, easing: quartIn}} 
+				out:fade={{duration:500}}
+			>
+				{@render children()}
+			</div>	
+		{/key}
+	</main>
+	<ThumbNav></ThumbNav>
+</AppLayout>
 
 <style>
 	
@@ -44,14 +47,9 @@
 		font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 	}
 
-	body {
-		margin: 0;
-		height: 100vh;
-		height: 100dvh;
-		display: flex;
-		flex-direction: column;
-		background-color: #131313;
-	}
+    button {
+        cursor: pointer
+    }
 }
 
 </style>
