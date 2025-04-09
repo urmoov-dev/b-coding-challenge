@@ -70,15 +70,14 @@
     let expandingCard = $state({showDetails: toggleProp || false})
     let {showDetails} = $derived(expandingCard)
 
-    // // svelte-ignore state_referenced_locally
-        setContext(`expandingCard${contextKey}`, expandingCard)
+    // svelte-ignore state_referenced_locally
+    setContext(`expandingCard${contextKey}`, expandingCard)
 
     const {
         height,
     } = $derived(jsStyle)
 
     const containerContext = contextKey ? getTargetContext(contextKey) : getTargetContext()
-    const ancestorContext = $state({})
 
     const {height: containerHeight = 0, width: containerWidth = 0, top: containerTop = 0, left: containerLeft = 0} = $derived(containerContext)
 
@@ -127,15 +126,22 @@
         containerContext.refresh?.()
         getSummaryPositionDetails()
 
+        let summaryTop = summaryButton.top!
+        if (node.parentElement?.classList.contains('sticks') && node.closest('.sticksTo')) {
+            const stickyTop = Math.max(summaryButton.top!, node.closest('.sticksTo')?.getBoundingClientRect().top!)
+            const stickyBottom = node.closest('.sticksTo')?.getBoundingClientRect().bottom! - node.parentElement.clientHeight
+            summaryTop = Math.min(stickyTop, stickyBottom)
+        }
+
         node.classList.add("inTransition")
         node.classList.add("outline")
-
         thisCardDetails?.querySelector(":scope > .opacity-overlay")?.classList.add("frosted-glass");
+
         const transformDiff = {
             width: 100-(100*cardWidth)/containerWidth,
             height: 100-(100*cardHeight)/containerHeight,
-            top: summaryButton.top! - containerTop,
-            left : summaryButton.left! - containerLeft 
+            top: summaryTop - containerTop,
+            left : summaryButton.left!  - containerLeft 
         }
 
         const allOverlays = thisCardDetails!.querySelectorAll(".opacity-overlay")     
@@ -405,7 +411,7 @@
         transform-origin: top left;
         border-radius: 1vh;
         outline: 0px solid var(--color-bg-2);
-        overflow: hidden;
+        overflow: auto;
         background-color: var(--color-bg-2);
         transition: outline var(--blurTime) ease-out, opacity 0.1s 0.1s;
     }
