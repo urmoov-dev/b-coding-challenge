@@ -1,3 +1,5 @@
+import type { BlurParams, CrossfadeParams, DrawParams, FlyParams, ScaleParams, SlideParams, TransitionConfig } from "svelte/transition"
+
 export type LightningNodes = {
     publicKey: string,
     alias: string,
@@ -16,3 +18,6 @@ export type LightningNodes = {
 }[]
 
 export type SortableLightningProperties = "publicKey" | "alias" | "channels" | "capacity" | "firstSeen" | "updatedAt" | "iso_code"
+
+export type AllTransitionParams = TransitionConfig | BlurParams | FlyParams | SlideParams | ScaleParams | DrawParams | CrossfadeParams
+export type OptionalTransition = undefined | ((node: Element, {}: AllTransitionParams | undefined) => TransitionConfig)
