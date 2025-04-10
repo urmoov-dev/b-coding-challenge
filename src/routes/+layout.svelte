@@ -25,7 +25,7 @@
 
 <AppLayout>
 	<Header></Header>
-	<main class="relative flex-1">
+	<main class="relative flex-1 mb-4">
 		{#key data.url}
 			<div class="pageWrapper absolute inset-0 w-full-h-full"
 				in:fade={{duration: 500, easing: quartIn}} 
