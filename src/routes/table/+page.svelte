@@ -2,8 +2,10 @@
 	import { getLocale } from "$lib/paraglide/runtime.js";
     import type { LightningNodes, SortableLightningProperties } from "$lib/types";
 	import { onMount } from "svelte";
-	import { setPageState } from "$lib/functions/forPageState";
+	import { setPageState, type PageStateKey } from "$lib/functions/forPageState";
 	import Table from "../components/Table.svelte";
+	import { page } from "$app/state";
+	import Loading from "$lib/components/Loading.svelte";
     
     const locale = getLocale()
 
@@ -109,7 +111,11 @@
 </script>
 
 <div class="component-positioner relative mx-auto">
-    <Table {lightningNodes} bind:sortBy {headers} {formatValue}></Table>
+    {#if fetchedNodes && page.state["view" as PageStateKey] === "table"}
+        <Table {lightningNodes} bind:sortBy {headers} {formatValue}></Table>
+    {:else}
+        <Loading></Loading>
+    {/if}
 </div>
 
 <style>

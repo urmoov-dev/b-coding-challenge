@@ -6,7 +6,7 @@
 	import Table from "./components/Table.svelte";
 	import { page } from "$app/state";
 	import { setPageState, type PageStateKey } from "$lib/functions/forPageState";
-	import { setLayoutState } from "$lib/components/layout-state.svelte";
+	import Loading from "$lib/components/Loading.svelte";
     
     const locale = getLocale()
 
@@ -102,7 +102,7 @@
         const json = await response.json()
         return json
     }
-
+    
     onMount(async () => {
         fetchedNodes = await fetchFromAPI()
         setPageState("table", "view", "push")
@@ -111,10 +111,12 @@
 </script>
 
 <div class="component-positioner relative mx-auto">
-    {#if page.state["view" as PageStateKey] === "table"}
+    {#if fetchedNodes && page.state["view" as PageStateKey] === "table"}
         <Table {lightningNodes} bind:sortBy {headers} {formatValue}></Table>
-    {:else if page.state["view" as PageStateKey] === "list"}
+    {:else if  fetchedNodes && page.state["view" as PageStateKey] === "list"}
         <List {lightningNodes} bind:sortBy {headers} {formatValue}></List>
+    {:else}
+        <Loading></Loading>
     {/if}
 </div>
 

@@ -3,7 +3,9 @@
     import type { LightningNodes, SortableLightningProperties } from "$lib/types";
 	import { onMount } from "svelte";
 	import List from "../components/List.svelte";
-	import { setPageState  } from "$lib/functions/forPageState";
+	import { setPageState, type PageStateKey  } from "$lib/functions/forPageState";
+	import Loading from "$lib/components/Loading.svelte";
+	import { page } from "$app/state";
     
     const locale = getLocale()
 
@@ -103,13 +105,17 @@
 
     onMount(async () => {
         fetchedNodes = await fetchFromAPI()
-        setPageState("table", "view", "push")
+        setPageState("list", "view", "push")
     })
 
 </script>
 
 <div class="component-positioner relative mx-auto">
-    <List {lightningNodes} bind:sortBy {headers} {formatValue}></List>
+    {#if  fetchedNodes && page.state["view" as PageStateKey] === "list"}
+        <List {lightningNodes} bind:sortBy {headers} {formatValue}></List>
+    {:else}
+        <Loading></Loading>
+    {/if}
 </div>
 
 <style>

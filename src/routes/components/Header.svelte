@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import LanguageSwitch from "$lib/components/LanguageSwitch.svelte";
 	import { getLayoutState } from "$lib/components/layout-state.svelte";
@@ -17,14 +18,14 @@
     {#if !layout.portrait || layout.width > 1000}
         <nav class="flex gap-[5vw]">
             <button class="flex items-center gap-3"
-                onclick={() => {setPageState("table", "view", "push")}}
+                onclick={async() => { await goto("/");setPageState("table", "view", "push")}}
                 class:selected={page.state["view" as PageStateKey] === "table"}
             >
                 <Fa icon={faTable}/>
                 Table
             </button>
             <button class="flex items-center gap-3"
-                onclick={() => {setPageState("list", "view", "push")}}
+                onclick={async() => { await goto("/");setPageState("list", "view", "push")}}
                 class:selected={page.state["view" as PageStateKey] === "list"}
             >
                 <Fa icon={faList}/>
