@@ -5,6 +5,7 @@ Installed and run with pnpm
 
 ## Steps to run the app
 Run `npm run dev --host` to run the dev server and expose the host for mobile view on port 5173
+Run `npm run build` to build the node server into the `/build` dir
 Run `npm run preview --host` to run the node server with the build and expose the host for mobile view
 
 ## What areas of the app did you focus on?
