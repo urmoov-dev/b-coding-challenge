@@ -63,7 +63,7 @@
     </div>
     <div class="bitcoin-wrapper text-6xl flex items-center rounded-[10rem] pl-5 btc-wrapper">
         <span>{formatValue("capacity", node)}</span>
-        <Fa icon={faBitcoin} size="2x" color="#f7931a"></Fa>
+        <Fa icon={faBitcoin} color="#f7931a"></Fa>
     </div>
     <div class="public-key-container flex flex-col w-full">
         <h2 class="text-5xl text-center mb-2">Public Key:</h2>
@@ -189,6 +189,18 @@
     .alias-container :global(svg) {
         font-size: 1rem;
     }
+    
+    .bitcoin-wrapper > span {
+        font-size: 3rem !important;
+        padding: none;
+    }
+    .bitcoin-wrapper > span:hover {
+        outline: solid 2px transparent !important;
+    }
+    .bitcoin-wrapper :global(svg) {
+        font-size: 4rem;
+    }
+    
     
     .infrastructure, .locationInfo {
             flex-direction: row;
