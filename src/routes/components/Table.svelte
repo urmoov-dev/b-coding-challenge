@@ -66,6 +66,7 @@
     th, td {
         padding: 1rem;
         white-space: nowrap;
+        overflow-x: auto;
     }
 
     th {

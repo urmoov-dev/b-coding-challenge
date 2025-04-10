@@ -125,4 +125,10 @@
         height: 100%;
         width: clamp(min(65rem, 98%), calc(50% + 25rem), 1920px);
     }
+
+    @media (orientation: portrait) and (max-width: 1000px) {
+        .component-positioner{
+            width: 100%;
+        }
+    }
 </style>
