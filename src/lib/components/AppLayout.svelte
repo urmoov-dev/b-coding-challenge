@@ -24,7 +24,6 @@
 		turnedPortrait = -portraitHeight + landscapeHeight
 
 		const currentJump = layout.height - lastHeight
-		console.log("current jump", currentJump)
 
 		if (lastJump !== turnedPortrait && currentJump > 150 && (!lastJump || lastJump < -150)) layout.virtualKeyboard = true
 		if (layout.portrait && lastJump > 150 && currentJump < -150) layout.virtualKeyboard = false
@@ -82,9 +81,10 @@
     
 	.app-layout {
 		position: absolute;
+		height: 100vh;
 		height: 100%;
+		height: 100dvh;
 		width: 100%;
-		max-width: 100vh;
 		display: flex;
 		flex-direction: column;
 	}
