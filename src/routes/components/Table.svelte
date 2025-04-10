@@ -1,24 +1,14 @@
 <script lang="ts">
 	import type { LightningNodes, SortableLightningProperties } from "$lib/types";
+	import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
+	import Fa from "svelte-fa";
+	import { fade } from "svelte/transition";
 
     let {headers, lightningNodes, sortBy = $bindable(), formatValue} = $props()    
 </script>
 
-<div class="table-container flex flex-col">
+<div class="table-container flex flex-col top-0 left-0" in:fade={{delay: 300}} out:fade>
     <table>
-        <thead>
-            <tr>
-            {#each headers as header, i}
-                <th class="{i < 1 ? "sticky-left" : ""} {header.key === sortBy ? "sorting" : ""}">
-                    <span>{header.label}</span>
-                {#if header.sortable}
-                    <button onclick={() => {sortBy = header.key as SortableLightningProperties}}>+</button>
-                {/if}
-                </th>
-            {/each}
-            </tr>
-        </thead>
-
         <tbody>
         {#each  lightningNodes as LightningNodes as node}
             <tr>
@@ -29,6 +19,23 @@
             </tr>
         {/each}
         </tbody>
+        <thead>
+            <tr>
+            {#each headers as header, i}
+                <th class="{i < 1 ? "sticky-left absolute z-20" : ""} {header.key === sortBy ? "sorting" : ""}">
+                    <span>{header.label}</span>
+                {#if header.sortable}
+                    <button class="pr-2" 
+                        onclick={() => {sortBy = header.key as SortableLightningProperties}}
+                    >
+                        <Fa icon={faCaretDown}/>
+                    </button>
+                {/if}
+                </th>
+            {/each}
+            </tr>
+        </thead>
+
     </table>
 </div>
 
@@ -37,8 +44,8 @@
         align-self: stretch;
         margin-inline: auto;
         color: var(--color-text-0);
-        max-width: 70%;
-        height: 90vh;
+        width: clamp(min(65rem, 98%), calc(50% + 25rem), 1920px);
+        height: 100%;
         max-width: white;
         overflow: auto;
         border-radius: 1rem;
@@ -54,7 +61,6 @@
     thead{
         position: sticky;
         top: 0;
-        z-index: 10;
     }
 
     th, td {
@@ -87,6 +93,8 @@
     .sticky-left {
         position: sticky;
         left: 0px;
+        z-index: 10;
+        max-width: 30vw;
     }
 
     .sticky-left:not(th) {
@@ -95,5 +103,13 @@
 
     .sorting * {
         color: var(--color-theme-1)
+    }
+    
+    @media (orientation: portrait) and (max-width: 1000px) {
+        
+        .table-container {
+            position: relative;
+            width: 98%;
+        }
     }
 </style>
