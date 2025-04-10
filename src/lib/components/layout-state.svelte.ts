@@ -29,7 +29,6 @@ export class LayoutState<T>{
      * @returns void
      */
     toggleMenu(toggleTo = !this.showMenu) {
-        console.log("click");
         this.showMenu = toggleTo
     }
     
