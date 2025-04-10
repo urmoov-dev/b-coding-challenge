@@ -3,6 +3,10 @@
     import type { LightningNodes, SortableLightningProperties } from "$lib/types";
 	import { onMount } from "svelte";
 	import List from "./components/List.svelte";
+	import Table from "./components/Table.svelte";
+	import { page } from "$app/state";
+	import { setPageState, type PageStateKey } from "$lib/functions/forPageState";
+	import { setLayoutState } from "$lib/components/layout-state.svelte";
     
     const locale = getLocale()
 
@@ -54,7 +58,7 @@
         {
             label: "Public Key",
             key: "publicKey",
-            sortable: true
+            sortable: false
         },
         {
             label: "Subdivision",
@@ -68,34 +72,55 @@
 
         if (key === "capacity") return `${obj[key]/100000000} BTC`;
 
+        const parsedLocale = locale === "pt-br" ? "pt-BR" 
+        : locale === "zh-cn" ? "zh-CN" : locale;
+
         if (key === "updatedAt" || key === "firstSeen") {
             const date = new Date(rawValue as number* 1000);
-            return date.toLocaleString(locale)
+            return date.toLocaleString(parsedLocale)
+        }
+        
+        if (key === "shortTime") {
+            const date = new Date(Date.UTC(2020, 11, 20, 3, 23, 16, 738));
+            return Intl.DateTimeFormat(locale, {
+                dateStyle: "short",
+                timeStyle: "short"
+            }).format(date)
         }
 
         if (key === "subdivision") {
             const localeSubdivision = JSON.parse(rawValue as string)
-            const parsedLocale = locale === "pt-br" ? "pt-BR" 
-                : locale === "zh-cn" ? "zh-CN" : locale 
+            
             return localeSubdivision?.[parsedLocale]
         }
 
         return rawValue
     }
 
-    onMount(async () => {
+    async function fetchFromAPI() {
         const response = await fetch("https://mempool.space/api/v1/lightning/nodes/rankings/connectivity")
         const json = await response.json()
-        console.log(json)
-        fetchedNodes = json
+        return json
+    }
+
+    onMount(async () => {
+        fetchedNodes = await fetchFromAPI()
+        setPageState("table", "view", "push")
     })
 
 </script>
 
-<!-- <Table {lightningNodes} bind:sortBy {headers} {formatValue}></Table> -->
-<List {lightningNodes} bind:sortBy {headers} {formatValue}></List>
+<div class="component-positioner relative mx-auto">
+    {#if page.state["view" as PageStateKey] === "table"}
+        <Table {lightningNodes} bind:sortBy {headers} {formatValue}></Table>
+    {:else if page.state["view" as PageStateKey] === "list"}
+        <List {lightningNodes} bind:sortBy {headers} {formatValue}></List>
+    {/if}
+</div>
 
 <style>
-   
-
+    .component-positioner {
+        height: 100%;
+        width: clamp(min(65rem, 98%), calc(50% + 25rem), 1920px);
+    }
 </style>
